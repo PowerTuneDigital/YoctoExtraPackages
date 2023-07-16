@@ -1,40 +1,51 @@
 #!/bin/bash
 
-# Find the Perl executable path
-PERL_EXECUTABLE=$(which perl)
+# Function to compare version numbers
+version_gt() {
+    test "$(printf '%s\n' "$@" | sort -V | head -n 1)" != "$1";
+}
 
-# Find the Perl library path
-PERL_LIB=$(perl -e 'use Config; print $Config{installsitelib}')
+# Check for Perl version
+PERL_VERSION=$(perl -e 'print substr($^V, 1)')
 
-# Find the OpenSSL library path
-OPENSSL_LIB=$(openssl version -d | awk -F'"' '{print $2}')
+# Check for OpenSSL version
+OPENSSL_VERSION=$(openssl version -a | awk '/OpenSSL/ {print $2}' | sed 's/u$//') # Remove 'u' from version string
 
-# Find the OpenSSL executable path
-OPENSSL_EXECUTABLE=$(which openssl)
+echo "Detected Perl version: $PERL_VERSION"
+echo "Detected OpenSSL version: $OPENSSL_VERSION"
+
+# Define the Perl and OpenSSL directories based on version
+PERL_LIB="/usr/local/lib/perl5/5.38.0"
+OPENSSL_LIB="/usr/local/lib"
+
+# Check if the Perl and OpenSSL directories exist
+if [ -d "$PERL_LIB" ] && [ -d "$OPENSSL_LIB" ] && command -v openssl >/dev/null; then
+    # Correct paths for Perl 5.38.0 and OpenSSL 1.1.1 (without 'u')
+    OPENSSL_EXECUTABLE=$(command -v openssl)
+else
+    # If the installed versions don't match the expected versions or directories don't exist, show an error message
+    echo "Error: The installed versions of Perl or OpenSSL do not match the expected versions (Perl: 5.38.0, OpenSSL: 1.1.1u), or the necessary directories are missing. Make sure you have compiled the correct versions first and that the directories exist."
+    exit 1
+fi
 
 # Create a temporary directory to hold compiled files
 TMP_DIR="$(mktemp -d)"
 
-# Check if the Perl and OpenSSL directories exist
-if [ -x "$PERL_EXECUTABLE" ] && [ -d "$PERL_LIB" ] && [ -d "$OPENSSL_LIB" ] && [ -x "$OPENSSL_EXECUTABLE" ]; then
-    # Copy compiled Perl files
-    cp -r "$PERL_LIB" "$TMP_DIR/perl"
+# Copy compiled Perl files
+cp -r "$PERL_LIB" "$TMP_DIR/perl"
 
-    # Copy compiled OpenSSL files
-    cp -r "$OPENSSL_LIB" "$TMP_DIR/openssl"
-    cp "$OPENSSL_EXECUTABLE" "$TMP_DIR/openssl/bin/"
+# Copy compiled OpenSSL files
+cp -r "$OPENSSL_LIB" "$TMP_DIR/openssl"
+cp "$OPENSSL_EXECUTABLE" "$TMP_DIR/openssl/bin/"
 
-    # Create a tarball containing the compiled Perl & OpenSSL files
-    TARBALL_NAME="compiled_perl_openssl.tar.gz"
-    tar -czf "$TARBALL_NAME" -C "$TMP_DIR" .
+# Create a tarball containing the compiled Perl & OpenSSL files
+TARBALL_NAME="compiled_perl_openssl.tar.gz"
+tar -czf "$TARBALL_NAME" -C "$TMP_DIR" .
 
-    # Move the tarball to the desired location
-    mv "$TARBALL_NAME" /home/pi/YoctoExtraPackages/test
+# Move the tarball to the desired location
+mv "$TARBALL_NAME" /home/pi/YoctoExtraPackages/test
 
-    # Clean up the temporary directory
-    rm -rf "$TMP_DIR"
+# Clean up the temporary directory
+rm -rf "$TMP_DIR"
 
-    echo "Tarball created successfully."
-else
-    echo "Error: The directories '$PERL_EXECUTABLE', '$PERL_LIB', '$OPENSSL_LIB', and/or '$OPENSSL_EXECUTABLE' do not exist. Make sure you have compiled Perl and OpenSSL first."
-fi
+echo "Tarball created successfully."

@@ -1,34 +1,51 @@
 #!/bin/bash
 
-# Define variables
-INSTALL_DIR="/usr/local/lib"
-TARBALL_URL="https://github.com/PowerTuneDigital/YoctoExtraPackages/raw/main/compiled_perl_openssl.tar.gz"
-TARBALL_NAME="compiled_perl_openssl.tar.gz"
+# Define the GitHub repository URL
+REPO_URL="https://github.com/PowerTuneDigital/YoctoExtraPackages.git"
+
+# Define the paths for Perl and OpenSSL
+PERL_INSTALL_PATH="/usr/local/lib/perl5/5.38.0"
+OPENSSL_INSTALL_PATH="/usr/local/lib"
+OPENSSL_BIN_PATH="/usr/local/bin"
+
+# Create a temporary directory to hold downloaded files
 TMP_DIR="$(mktemp -d)"
 
-# Step 1: Download the tarball from the GitHub repo
-wget "$TARBALL_URL" -O "$TMP_DIR/$TARBALL_NAME"
+# Function to check if a command is available
+command_exists() {
+    command -v "$1" >/dev/null 2>&1
+}
 
-# Step 2: Extract the tarball
-tar -xzf "$TMP_DIR/$TARBALL_NAME" -C "$TMP_DIR"
-
-# Step 3: Check if the extracted Perl and OpenSSL directories exist
-if [ -d "$TMP_DIR/perl" ] && [ -d "$TMP_DIR/openssl" ]; then
-    # Copy files to the correct folders
-    cp -r "$TMP_DIR/perl" "$INSTALL_DIR"
-    cp -r "$TMP_DIR/openssl" "$INSTALL_DIR"
-
-    # Step 4: Register it with the system permanently (Add to PATH and LD_LIBRARY_PATH)
-    echo "export PATH=\"$INSTALL_DIR/perl/bin:\$PATH\"" >> /etc/profile
-    echo "export LD_LIBRARY_PATH=\"$INSTALL_DIR/openssl/lib:\$LD_LIBRARY_PATH\"" >> /etc/profile
-
-    # Optional: Make the changes effective immediately (reload the profile)
-    source /etc/profile
-
-    echo "Perl and OpenSSL installation completed!"
-else
-    echo "Error: The directories 'perl' and/or 'openssl' do not exist in the tarball. Please make sure the tarball contains the correct directories."
+# Check if 'git' command is available
+if ! command_exists git; then
+    echo "Error: 'git' command not found. Please install git before running this script."
+    exit 1
 fi
 
-# Clean up the temporary directory
-rm -rf "$TMP_DIR"
+# Clone the GitHub repository to the temporary directory
+git clone "$REPO_URL" "$TMP_DIR"
+
+# Navigate to the extracted directory containing the tarball
+cd "$TMP_DIR/YoctoExtraPackages"
+
+# Extract the tarball
+tar -xzf compiled_perl_openssl.tar.gz
+
+# Copy the compiled Perl and OpenSSL files to the correct paths
+cp -r perl "$PERL_INSTALL_PATH"
+cp -r openssl "$OPENSSL_INSTALL_PATH"
+cp openssl/bin/openssl "$OPENSSL_BIN_PATH"
+
+# Set environment variables for Perl and OpenSSL
+export PATH="$OPENSSL_BIN_PATH:$PATH"
+export LD_LIBRARY_PATH="$OPENSSL_INSTALL_PATH/lib:$LD_LIBRARY_PATH"
+
+# Register the versions of Perl and OpenSSL
+echo "export PATH=\"$OPENSSL_BIN_PATH:\$PATH\"" >> /etc/profile.d/yocto_extra_packages.sh
+echo "export LD_LIBRARY_PATH=\"$OPENSSL_INSTALL_PATH/lib:\$LD_LIBRARY_PATH\"" >> /etc/profile.d/yocto_extra_packages.sh
+
+# Reload the profile to apply the changes
+source /etc/profile
+
+echo "Installation completed successfully."
+
