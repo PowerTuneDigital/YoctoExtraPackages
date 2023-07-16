@@ -24,7 +24,3 @@ fi
 
 # Step 4: Source the ~/.bashrc file to apply changes immediately
 source "$BASHRC"
-
-# Step 5: Clean up
-rm -rf "openssl-${OPENSSL_VERSION}"
-
