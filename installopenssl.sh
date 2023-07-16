@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # Define variables
+OPENSSL_VERSION="1.1.1u"
 TARBALL_NAME="openssl_1.1.1u.tar.gz"
 INSTALL_DIR="/usr/local/ssl"
 
