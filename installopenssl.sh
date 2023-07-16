@@ -2,7 +2,7 @@
 
 # Define variables
 TARBALL_NAME="openssl_1.1.1u.tar.gz"
-INSTALL_DIR="/opt/ssl"
+INSTALL_DIR="/usr/local/ssl"
 
 # Step 1: Extract the tarball
 tar -xzf "$TARBALL_NAME"

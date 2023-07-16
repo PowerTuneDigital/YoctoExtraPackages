@@ -24,7 +24,7 @@ make install
 
 # Step 4: Create the tarball
 cd ..
-tar -czf "$TARBALL_NAME" "openssl-${OPENSSL_VERSION}"
+tar -czf "$TARBALL_NAME" "Yoctoopenssl-${OPENSSL_VERSION}"
 
 # Step 5: Clean up
 rm -rf "openssl-${OPENSSL_VERSION}"
