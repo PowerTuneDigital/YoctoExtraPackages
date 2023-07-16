@@ -25,27 +25,39 @@ fi
 # Clone the GitHub repository to the temporary directory
 git clone "$REPO_URL" "$TMP_DIR"
 
-# Navigate to the extracted directory containing the tarball
-cd "$TMP_DIR/YoctoExtraPackages"
+# Check if the tarball exists
+if [ -f "$TMP_DIR/compiled_perl_openssl.tar.gz" ]; then
+    echo "Tarball found in the downloaded directory. Continuing..."
+    # Navigate to the extracted directory containing the tarball
+    cd "$TMP_DIR"
 
-# Extract the tarball
-tar -xzf compiled_perl_openssl.tar.gz
+    # Extract the tarball
+    tar -xzf compiled_perl_openssl.tar.gz
 
-# Copy the compiled Perl and OpenSSL files to the correct paths
-cp -r perl "$PERL_INSTALL_PATH"
-cp -r openssl "$OPENSSL_INSTALL_PATH"
-cp openssl/bin/openssl "$OPENSSL_BIN_PATH"
+    # Create necessary directories if they don't exist
+    mkdir -p "$PERL_INSTALL_PATH"
+    mkdir -p "$OPENSSL_INSTALL_PATH"
+    mkdir -p "$OPENSSL_BIN_PATH"
 
-# Set environment variables for Perl and OpenSSL
-export PATH="$OPENSSL_BIN_PATH:$PATH"
-export LD_LIBRARY_PATH="$OPENSSL_INSTALL_PATH/lib:$LD_LIBRARY_PATH"
+    # Copy the compiled Perl and OpenSSL files to the correct paths
+    cp -r perl "$PERL_INSTALL_PATH"
+    cp -r openssl "$OPENSSL_INSTALL_PATH"
+    cp openssl/bin/openssl "$OPENSSL_BIN_PATH"
 
-# Register the versions of Perl and OpenSSL
-echo "export PATH=\"$OPENSSL_BIN_PATH:\$PATH\"" >> /etc/profile.d/yocto_extra_packages.sh
-echo "export LD_LIBRARY_PATH=\"$OPENSSL_INSTALL_PATH/lib:\$LD_LIBRARY_PATH\"" >> /etc/profile.d/yocto_extra_packages.sh
+    # Set environment variables for Perl and OpenSSL
+    export PATH="$OPENSSL_BIN_PATH:$PATH"
+    export LD_LIBRARY_PATH="$OPENSSL_INSTALL_PATH/lib:$LD_LIBRARY_PATH"
 
-# Reload the profile to apply the changes
-source /etc/profile
+    # Register the versions of Perl and OpenSSL
+    echo "export PATH=\"$OPENSSL_BIN_PATH:\$PATH\"" >> /etc/profile.d/yocto_extra_packages.sh
+    echo "export LD_LIBRARY_PATH=\"$OPENSSL_INSTALL_PATH/lib:\$LD_LIBRARY_PATH\"" >> /etc/profile.d/yocto_extra_packages.sh
 
-echo "Installation completed successfully."
+    # Reload the profile to apply the changes
+    source /etc/profile
 
+    echo "Installation completed successfully."
+else
+    echo "Error: The tarball 'compiled_perl_openssl.tar.gz' not found in the downloaded directory."
+    ls -al "$TMP_DIR"
+    exit 1
+fi
