@@ -3,7 +3,7 @@
 # Define variables
 OPENSSL_VERSION="1.1.1u"
 TARBALL_NAME="YoctoPi4SSL1.tar.gz"
-INSTALL_DIR="/usr/local/ssl"
+INSTALL_DIR="/usr/local/sslopenssl-1.1.1u"
 
 # Step 1: Extract the tarball
 tar -xzf "$TARBALL_NAME"
