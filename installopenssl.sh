@@ -9,6 +9,7 @@ INSTALL_DIR="/usr/local/ssl"
 tar -xzf "$TARBALL_NAME"
 
 # Step 2: Copy files to the correct folder structure
+mkdir /usr/local/ssl
 cp -R openssl-1.1.1u "$INSTALL_DIR/"
 
 # Step 3: Set necessary path variables if not already present in ~/.bashrc
