@@ -3,14 +3,13 @@
 # Define variables
 OPENSSL_VERSION="1.1.1u"
 TARBALL_NAME="YoctoPi4SSL1.tar.gz"
-INSTALL_DIR="/usr/local/sslopenssl-1.1.1u"
+INSTALL_DIR="/usr/local/openssl-1.1.1u"
 
 # Step 1: Extract the tarball
 tar -xzf "$TARBALL_NAME"
 
 # Step 2: Copy files to the correct folder structure
 mkdir /usr/local/
-mkdir /usr/local/ssl
 cp -R openssl-1.1.1u "$INSTALL_DIR/"
 
 # Step 3: Set necessary path variables if not already present in ~/.bashrc
